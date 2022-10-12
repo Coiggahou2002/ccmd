@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 
+import "./main.css";
 /**
  * If you enables use of Node.js API in the Renderer-process
  * ```
