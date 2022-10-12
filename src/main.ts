@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import {store} from './store'
 
 import "./main.css";
 /**
@@ -11,8 +12,18 @@ import "./main.css";
  */
 // import './samples/node-api'
 
-createApp(App)
-  .mount('#app')
-  .$nextTick(() => {
+import hljs from 'highlight.js';
+import 'highlight.js/styles/atom-one-light.css';
+
+
+const app = createApp(App);
+  app.directive('highlight', function(el) {
+    const blocks = el.querySelectorAll('pre code');
+    blocks.forEach((block : any) => {
+      hljs.highlightBlock(block)
+    })
+  });
+  app.use(store);
+  app.mount('#app').$nextTick(() => {
     postMessage({ payload: 'removeLoading' }, '*')
   })

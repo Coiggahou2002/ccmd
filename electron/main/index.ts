@@ -12,7 +12,7 @@ process.env.DIST_ELECTRON = join(__dirname, '..')
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
 process.env.PUBLIC = app.isPackaged ? process.env.DIST : join(process.env.DIST_ELECTRON, '../public')
 
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { release } from 'os'
 import { join } from 'path'
 
@@ -42,6 +42,15 @@ async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
     icon: join(process.env.PUBLIC, 'favicon.ico'),
+    titleBarStyle: 'hidden',
+    // titleBarOverlay: {
+    //   color: '#fff',
+    //   symbolColor: '#000',
+    //   height: 20,
+    // },
+    // transparent: true,
+    // frame: false,
+    // resizable: false,
     webPreferences: {
       preload,
       // Warning: Enable nodeIntegration and disable contextIsolation is not secure in production
@@ -50,6 +59,13 @@ async function createWindow() {
       nodeIntegration: true,
       contextIsolation: false,
     },
+  })
+
+  /**
+   * prevent navigating to new web pages
+   */
+  win.webContents.on('will-navigate', (e) => {
+    e.preventDefault()
   })
 
   if (app.isPackaged) {
@@ -110,4 +126,19 @@ ipcMain.handle('open-win', (event, arg) => {
     childWindow.loadURL(`${url}/#${arg}`)
     // childWindow.webContents.openDevTools({ mode: "undocked", activate: true })
   }
+})
+
+
+ipcMain.handle('showDirDialog', async () => {
+  let res = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+  if (res.canceled) {
+    return '';
+  }
+  else return res.filePaths[0];
+})
+
+ipcMain.on('closeApp', (evt, arg) => {
+  app.quit();
 })
